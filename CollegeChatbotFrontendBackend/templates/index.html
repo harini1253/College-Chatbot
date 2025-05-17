@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>College Chatbot</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet" />
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(to right, #e3f2fd, #f3e5f5);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      padding: 40px 20px;
+    }
+
+    h1 {
+      color: #4a148c;
+      margin-bottom: 20px;
+      font-size: 2.2rem;
+      text-shadow: 1px 1px 2px #ccc;
+    }
+
+    #chat-box {
+      width: 100%;
+      max-width: 600px;
+      height: 450px;
+      background: #fff;
+      border-radius: 20px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+      padding: 20px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .message {
+      padding: 12px 20px;
+      border-radius: 20px;
+      font-size: 1rem;
+      max-width: 75%;
+      word-wrap: break-word;
+      opacity: 0;
+      animation: fadeIn 0.4s forwards;
+    }
+
+    .user {
+      align-self: flex-end;
+      background: linear-gradient(to right, #26c6da, #00acc1);
+      color: white;
+    }
+
+    .bot {
+      align-self: flex-start;
+      background: linear-gradient(to right, #8e24aa, #d81b60);
+      color: white;
+    }
+
+    @keyframes fadeIn {
+      to {
+        opacity: 1;
+      }
+    }
+
+    #input-area {
+      width: 100%;
+      max-width: 600px;
+      margin-top: 20px;
+      display: flex;
+      gap: 10px;
+    }
+
+    input[type="text"] {
+      flex-grow: 1;
+      padding: 12px 20px;
+      font-size: 1rem;
+      border: 2px solid #ce93d8;
+      border-radius: 30px;
+      outline: none;
+      transition: 0.3s ease;
+    }
+
+    input[type="text"]:focus {
+      border-color: #8e24aa;
+      box-shadow: 0 0 8px #ba68c8;
+    }
+
+    button {
+      padding: 12px 24px;
+      border: none;
+      border-radius: 30px;
+      background: #ab47bc;
+      color: white;
+      font-weight: bold;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+
+    button:hover {
+      background: #8e24aa;
+    }
+
+  </style>
+</head>
+<body>
+  <h1>College Chatbot</h1>
+
+  <div id="chat-box"></div>
+
+  <div id="input-area">
+    <input id="user-input" type="text" placeholder="Ask me about college..." />
+    <button onclick="sendMessage()">Send</button>
+  </div>
+
+  <script>
+    async function sendMessage() {
+      const input = document.getElementById("user-input");
+      const message = input.value.trim();
+      if (!message) return;
+
+      appendMessage(message, "user");
+
+      input.value = "";
+      input.disabled = true;
+
+      try {
+        const response = await fetch("/chat", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ message })
+        });
+
+        const data = await response.json();
+        appendMessage(data.response, "bot");
+      } catch (err) {
+        appendMessage("Sorry, the server is not responding.", "bot");
+      } finally {
+        input.disabled = false;
+        input.focus();
+      }
+    }
+
+    function appendMessage(text, className) {
+      const chatBox = document.getElementById("chat-box");
+      const msgDiv = document.createElement("div");
+      msgDiv.className = `message ${className}`;
+      msgDiv.textContent = text;
+      chatBox.appendChild(msgDiv);
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    document.getElementById("user-input").addEventListener("keydown", (e) => {
+      if (e.key === "Enter") sendMessage();
+    });
+  </script>
+</body>
+</html>
+
